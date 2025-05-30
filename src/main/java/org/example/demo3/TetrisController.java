@@ -10,7 +10,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.input.KeyCode;
 
-public class HelloController {
+public class TetrisController {
     @FXML
     private Canvas gameCanvas;
 
