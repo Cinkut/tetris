@@ -15,6 +15,9 @@ public class TetrisBoard {
     // Aktualny klocek
     private Tetromino currentPiece;
 
+    // Następny klocek
+    private Tetromino nextPiece;
+
     // Licznik punktów
     private int score;
 
@@ -23,7 +26,8 @@ public class TetrisBoard {
 
     public TetrisBoard() {
         board = new Color[BOARD_HEIGHT][BOARD_WIDTH];
-        newPiece();
+        nextPiece = new Tetromino(); // Najpierw tworzymy następny klocek
+        newPiece();                  // Potem tworzymy aktualny klocek
         score = 0;
         isGameOver = false;
     }
@@ -32,7 +36,19 @@ public class TetrisBoard {
      * Tworzy nowy klocek
      */
     public void newPiece() {
-        currentPiece = new Tetromino();
+        currentPiece = nextPiece;        // Aktualny klocek staje się tym, który był "następny"
+        nextPiece = new Tetromino();     // Tworzymy nowy "następny" klocek
+
+        // Ustawiamy pozycję startową dla aktualnego klocka
+        currentPiece.setX(BOARD_WIDTH / 2 - currentPiece.getShape()[0].length / 2);
+        currentPiece.setY(0);
+    }
+
+    /**
+     * Zwraca następny klocek
+     */
+    public Tetromino getNextPiece() {
+        return nextPiece;
     }
 
     /**
@@ -231,8 +247,26 @@ public class TetrisBoard {
      */
     public void reset() {
         board = new Color[BOARD_HEIGHT][BOARD_WIDTH];
-        newPiece();
+        nextPiece = new Tetromino(); // Najpierw tworzymy następny klocek
+        newPiece();                  // Potem tworzymy aktualny klocek
         score = 0;
         isGameOver = false;
+    }
+
+    /**
+     * Zwraca kopię aktualnego klocka w pozycji, gdzie wylądowałby po zrzuceniu
+     */
+    public Tetromino getGhostPiecePosition() {
+        Tetromino ghost = currentPiece.copy();
+
+        // Przesuń klocek jak najdalej w dół bez kolizji
+        while (!hasCollision(ghost)) {
+            ghost.setY(ghost.getY() + 1);
+        }
+
+        // Cofnij o jedną pozycję w górę (aby nie było kolizji)
+        ghost.setY(ghost.getY() - 1);
+
+        return ghost;
     }
 }

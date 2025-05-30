@@ -15,6 +15,9 @@ public class HelloController {
     private Canvas gameCanvas;
 
     @FXML
+    private Canvas nextPieceCanvas;
+
+    @FXML
     private Label scoreLabel;
 
     @FXML
@@ -30,6 +33,7 @@ public class HelloController {
 
     // Rozmiary planszy do rysowania
     private final int BLOCK_SIZE = 25;
+    private final int NEXT_BLOCK_SIZE = 20;  // Mniejszy rozmiar dla podglądu
     private final int BORDER_WIDTH = 2;
 
     // Czas aktualizacji gry (ms)
@@ -220,6 +224,24 @@ public class HelloController {
             }
         }
 
+        if (isRunning && !isPaused) {
+            // Rysuj "cień" klocka (pozycja gdzie wyląduje po zrzuceniu)
+            Tetromino ghost = board.getGhostPiecePosition();
+            int[][] ghostShape = ghost.getShape();
+
+            for (int i = 0; i < ghostShape.length; i++) {
+                for (int j = 0; j < ghostShape[i].length; j++) {
+                    if (ghostShape[i][j] != 0) {
+                        int x = ghost.getX() + j;
+                        int y = ghost.getY() + i;
+                        if (y >= 0) { // Nie rysuj ponad górną granicą planszy
+                            drawGhostBlock(gc, x, y);
+                        }
+                    }
+                }
+            }
+        }
+
         // Rysuj aktualny klocek
         Tetromino current = board.getCurrentPiece();
         int[][] shape = current.getShape();
@@ -248,6 +270,20 @@ public class HelloController {
         for (int i = 0; i <= TetrisBoard.BOARD_WIDTH; i++) {
             gc.strokeLine(i * BLOCK_SIZE, 0, i * BLOCK_SIZE, BLOCK_SIZE * TetrisBoard.BOARD_HEIGHT);
         }
+
+        // Rysuj następny klocek
+        drawNextPiece();
+    }
+
+    /**
+     * Rysuje kontur bloku (cień) w miejscu, gdzie wyląduje klocek
+     */
+    private void drawGhostBlock(GraphicsContext gc, int x, int y) {
+        // Rysuj tylko obramowanie klocka
+        gc.setStroke(Color.WHITE);
+        gc.setLineWidth(1);
+        gc.strokeRect(x * BLOCK_SIZE + 2, y * BLOCK_SIZE + 2,
+                     BLOCK_SIZE - 4, BLOCK_SIZE - 4);
     }
 
     private void drawBlock(GraphicsContext gc, int x, int y, Color color) {
@@ -267,5 +303,47 @@ public class HelloController {
                    BORDER_WIDTH, BLOCK_SIZE - 2 * BORDER_WIDTH);
         gc.fillRect(x * BLOCK_SIZE + BORDER_WIDTH, y * BLOCK_SIZE + BLOCK_SIZE - 2 * BORDER_WIDTH,
                    BLOCK_SIZE - 2 * BORDER_WIDTH, BORDER_WIDTH);
+    }
+
+    private void drawNextPiece() {
+        GraphicsContext gc = nextPieceCanvas.getGraphicsContext2D();
+
+        // Tło
+        gc.setFill(Color.BLACK);
+        gc.fillRect(0, 0, nextPieceCanvas.getWidth(), nextPieceCanvas.getHeight());
+
+        // Rysuj następny klocek
+        Tetromino next = board.getNextPiece();
+        int[][] shape = next.getShape();
+        Color color = next.getColor();
+
+        for (int i = 0; i < shape.length; i++) {
+            for (int j = 0; j < shape[i].length; j++) {
+                if (shape[i][j] != 0) {
+                    int x = j;
+                    int y = i;
+                    drawNextBlock(gc, x, y, color);
+                }
+            }
+        }
+    }
+
+    private void drawNextBlock(GraphicsContext gc, int x, int y, Color color) {
+        gc.setFill(color);
+        gc.fillRect(x * NEXT_BLOCK_SIZE + BORDER_WIDTH, y * NEXT_BLOCK_SIZE + BORDER_WIDTH,
+                   NEXT_BLOCK_SIZE - 2 * BORDER_WIDTH, NEXT_BLOCK_SIZE - 2 * BORDER_WIDTH);
+
+        // Efekt 3D
+        gc.setFill(color.brighter());
+        gc.fillRect(x * NEXT_BLOCK_SIZE + BORDER_WIDTH, y * NEXT_BLOCK_SIZE + BORDER_WIDTH,
+                   NEXT_BLOCK_SIZE - 2 * BORDER_WIDTH, BORDER_WIDTH);
+        gc.fillRect(x * NEXT_BLOCK_SIZE + BORDER_WIDTH, y * NEXT_BLOCK_SIZE + BORDER_WIDTH,
+                   BORDER_WIDTH, NEXT_BLOCK_SIZE - 2 * BORDER_WIDTH);
+
+        gc.setFill(color.darker());
+        gc.fillRect(x * NEXT_BLOCK_SIZE + NEXT_BLOCK_SIZE - 2 * BORDER_WIDTH, y * NEXT_BLOCK_SIZE + BORDER_WIDTH,
+                   BORDER_WIDTH, NEXT_BLOCK_SIZE - 2 * BORDER_WIDTH);
+        gc.fillRect(x * NEXT_BLOCK_SIZE + BORDER_WIDTH, y * NEXT_BLOCK_SIZE + NEXT_BLOCK_SIZE - 2 * BORDER_WIDTH,
+                   NEXT_BLOCK_SIZE - 2 * BORDER_WIDTH, BORDER_WIDTH);
     }
 }
