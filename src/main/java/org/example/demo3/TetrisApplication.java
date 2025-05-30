@@ -11,7 +11,7 @@ public class TetrisApplication extends Application {
     @Override
     public void start(Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(TetrisApplication.class.getResource("tetris-view.fxml"));
-        Scene scene = new Scene(fxmlLoader.load(), 580, 780); // Minimalnie zmniejszono rozmiar okna
+        Scene scene = new Scene(fxmlLoader.load(), 580, 650); // Zmniejszono wysokość okna
         stage.setTitle("Tetris");
         stage.setScene(scene);
         stage.setResizable(true);
